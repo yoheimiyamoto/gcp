@@ -16,18 +16,24 @@ import (
 )
 
 /*
-transferHandlerとtaskHandlerをhandleFuncを使ってセットします。
+forwardHandlerとtaskHandlerをhandleFuncを使ってセットします。
 
 
 URL
 
 各URLは以下となります。
+	// ルール
 	transfer -> path
 	task -> /task/{path}
 
-TransferHandler
+	// 例
+	path = /test
+	transfer -> /test
+	task -> /task/test
 
-transferHandlerは受け取ったリクエストをtaskHandlerに転送します。
+ForwardHandler
+
+forwardHandlerは受け取ったリクエストをtaskHandlerに転送します。
 転送する内容はbodyとクエリパラメータの2つです。
 
 TaskHandler
@@ -36,16 +42,16 @@ taskHandlerは、handlerへのリクエストをtaskHandlerに転送し、taskQu
 
 */
 func HandleFuncs(path, queueName string, handler http.HandlerFunc) {
-	http.HandleFunc(path, transferHandler(path, queueName))
+	http.HandleFunc(path, forwardHandler(path, queueName))
 	http.HandleFunc(fmt.Sprintf("/task%s", path), handler)
 }
 
 /*
-transferHandlerを生成します。
-transferHandlerは受け取ったリクエストをtaskHandlerに転送します。
+forwardHandlerを生成します。
+forwardHandlerは受け取ったリクエストをtaskHandlerに転送します。
 転送する内容はbodyとクエリパラメータの2つです。
 */
-func transferHandler(path, queueName string) http.HandlerFunc {
+func forwardHandler(path, queueName string) http.HandlerFunc {
 	f := func(w http.ResponseWriter, r *http.Request) {
 		ctx := appengine.NewContext(r)
 
